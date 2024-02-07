@@ -9,13 +9,20 @@ from modelscope import (
     HubApi, snapshot_download, AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 )
 
-YOUR_ACCESS_TOKEN = "9885e4ab-6985-45a3-aba9-ed3d9af6d2ae"
+YOUR_ACCESS_TOKEN = "34ea45f6-f624-4de6-9604-2e378dd4d4f7"
 
 api = HubApi()
 api.login(YOUR_ACCESS_TOKEN)
 
 model_zh = snapshot_download("QiYuan-tech/LLM-Detector-Small-zh",revision = "v1.0.0")
 model_en = snapshot_download("QiYuan-tech/LLM-Detector-Small-en",revision = "v1.0.0")
+
+tokenizer_zh = AutoTokenizer.from_pretrained(model_zh, trust_remote_code=True)
+model_zh = AutoModelForCausalLM.from_pretrained(model_zh, device_map="auto", trust_remote_code=True).eval()
+
+tokenizer_en = AutoTokenizer.from_pretrained(model_zh, trust_remote_code=True)
+# GPU
+model_en = AutoModelForCausalLM.from_pretrained(model_zh, device_map="auto", trust_remote_code=True).eval()
 
 # pip install gradio==3.50.2 -i https://pypi.tuna.tsinghua.edu.cn/simple
 #os.system("pip install gradio==3.50.2 -i https://pypi.tuna.tsinghua.edu.cn/simple")
@@ -76,9 +83,9 @@ def infer(select_model, input_text):
     file_name = generate_random_string(32)
     
     if select_model=="LLM-Detector-Small-zh":
-        global model_zh
-        tokenizer_zh = AutoTokenizer.from_pretrained(model_zh, trust_remote_code=True)
-        model_zh = AutoModelForCausalLM.from_pretrained(model_zh, device_map="auto", trust_remote_code=True).eval()
+        #global model_zh
+        #tokenizer_zh = AutoTokenizer.from_pretrained(model_zh, trust_remote_code=True)
+        #model_zh = AutoModelForCausalLM.from_pretrained(model_zh, device_map="auto", trust_remote_code=True).eval()
         #model_zh = AutoModelForCausalLM.from_pretrained("./ZH", device_map="auto", trust_remote_code=True).cuda()
         
         llm_results, history = model_zh.chat(tokenizer_zh, input_text, history=None)
@@ -104,10 +111,10 @@ def infer(select_model, input_text):
         return predicted_labels, predictions, folder_path+file_name+'.json'
     
     if select_model=="LLM-Detector-Small-en":
-        global model_en
-        tokenizer_en = AutoTokenizer.from_pretrained(model_zh, trust_remote_code=True)
+        #global model_en
+        #tokenizer_en = AutoTokenizer.from_pretrained(model_zh, trust_remote_code=True)
         # GPU
-        model_en = AutoModelForCausalLM.from_pretrained(model_zh, device_map="auto", trust_remote_code=True).eval()
+        #model_en = AutoModelForCausalLM.from_pretrained(model_zh, device_map="auto", trust_remote_code=True).eval()
         #model_en = AutoModelForCausalLM.from_pretrained("./EN", device_map="auto", trust_remote_code=True).cuda()
         
         llm_results, history = model_en.chat(tokenizer_en, input_text, history=None)
